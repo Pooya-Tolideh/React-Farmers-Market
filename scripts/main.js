@@ -1,6 +1,20 @@
 const React = require('react');
 const ReactDOM = require('react-dom');
 
+//<App/>
+const App = React.createClass({
+    render: () => {
+        return (
+            <div className="catch-of-the-day">
+                <div className="menu">
+                    <Header tagline="Fresh Seafood Market"/>
+                </div>
+                <Order/>
+                <Inventory/>
+            </div>
+        )
+    }
+});
 
 
 
