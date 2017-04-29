@@ -2,7 +2,7 @@ const React = require('react');
 const ReactDOM = require('react-dom');
 const ReactRouter = require('react-router');
 const createBrowserHistory = require('history/lib/createBrowserHistory');
-const h = require('./herlpers.js');
+const h = require('./helpers.js');
 
 const Router = ReactRouter.Router;
 const Route = ReactRouter.Route;
@@ -63,7 +63,7 @@ const StorePicker = React.createClass({
         return(
             <form action="" className="store-selector">
                     <h2>Please enter a store</h2>
-                    <input type="text" ref="storeId"/>
+                    <input type="text" ref="storeId" defaultValue={h.getFunName()}/>
                     <input type="submit"/>
             </form>
        )
