@@ -69,11 +69,24 @@ const StorePicker = React.createClass({
     }
 });
 
+
+//<NotFound/>
+const NotFound = React.createClass({
+    render : () => {
+        return(
+            <p>Not Found</p>
+        )
+    }
+});
+
+
 const routes = (
     <Router history={createBrowserHistory()}>
         <Route path="/" component={StorePicker}/>
         <Route path="/store/:storeId" component={App}/>
+        <Route path="*" component={NotFound}/>
     </Router>
 )
+
 
 ReactDOM.render(routes, document.getElementById('main'));
