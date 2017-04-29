@@ -2,6 +2,7 @@ const React = require('react');
 const ReactDOM = require('react-dom');
 const ReactRouter = require('react-router');
 const createBrowserHistory = require('history/lib/createBrowserHistory');
+const h = require('./herlpers.js');
 
 const Router = ReactRouter.Router;
 const Route = ReactRouter.Route;
