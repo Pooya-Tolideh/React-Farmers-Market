@@ -39,6 +39,17 @@ const Inventory = React.createClass({
 });
 
 const AddForm = React.createClass({
+    createItem: function(e) {
+        e.preventDefault();
+        var item = {
+            name : this.refs.name.value,
+            price : this.refs.price.value,
+            status : this.refs.status.value,
+            desc : this.refs.desc.value,
+            image : this.refs.image.value
+        };
+        console.log(item);
+    },
     render: function() {
         return (
             <form className="fish-edit" onSubmit={this.createItem}>
