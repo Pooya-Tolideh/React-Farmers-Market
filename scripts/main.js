@@ -7,6 +7,7 @@ const h = require('./helpers.js');
 const Router = ReactRouter.Router;
 const Route = ReactRouter.Route;
 const Navigation = ReactRouter.Navigation;
+const History = ReactRouter.History;
 
 //<App/>
 const App = React.createClass({
@@ -14,7 +15,7 @@ const App = React.createClass({
         return (
             <div className="catch-of-the-day">
                 <div className="menu">
-                    <Header tagline="Fresh Seafood Market"/>
+                    <Header tagline="Fresh Farmers Market"/>
                 </div>
                 <Order/>
                 <Inventory/>
@@ -29,7 +30,10 @@ const App = React.createClass({
 const Inventory = React.createClass({
     render : () => {
         return(
-            <p>Inventory</p>
+            <div>
+                <p>Inventory</p>
+                <AddForm />
+            </div>
         )
     }
 });
@@ -48,7 +52,7 @@ const Header = React.createClass({
     render : function () {
         return(
             <header className="top">
-                <h1>Catch of the Day</h1>
+                <h1>Sunnyville Farmers Market</h1>
                 <h3 className="tagline"><span>{this.props.tagline}</span></h3>
             </header>
         )
@@ -59,9 +63,18 @@ const Header = React.createClass({
 
 // <StorePicker/>
 const StorePicker = React.createClass({
-    render: () => {
+    mixins: [History],
+    goToStore: function(e) {
+        e.preventDefault();
+        //Normally we'd write ->
+        //const value = document.querySelector('.store-selector').querySelector('input').value;
+        const storeId = this.refs.storeId.value;
+        // console.log(storeId);
+        this.history.pushState( null, `/store/${storeId}`);
+    },
+    render: function() {
         return(
-            <form action="" className="store-selector">
+            <form action="" className="store-selector" onSubmit={this.goToStore}>
                     <h2>Please enter a store</h2>
                     <input type="text" ref="storeId" defaultValue={h.getFunName()}/>
                     <input type="submit"/>
