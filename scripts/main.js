@@ -82,7 +82,7 @@ const App = React.createClass({
                         {this.renderItems()}
                     </ul>
                 </div>
-                <Order fishes={this.state.items} orders={this.state.orders}/>
+                <Order items={this.state.items} orders={this.state.orders}/>
                 <Inventory addItem={ this.addItem } />
             </div>
         )
@@ -90,7 +90,7 @@ const App = React.createClass({
 });
 
 
-//<Fish />
+//<Item />
 
 const Item = React.createClass({
 
@@ -170,30 +170,60 @@ const AddForm = React.createClass({
 //<Order/>
 const Order = React.createClass({
 
-    getTotal: function() {
-        const orderIds = Object.keys(this.props.orders);
-        return orderIds.reduce((total, key) => {
-            let fish = this.props.fishes[key];
+    getTotal: function(ids) {
+        return ids.reduce((total, key) => {
+            let item = this.props.items[key];
             let count = this.props.orders[key];
-            const isAvailable = (fish.status === 'Fresh') ? true : false;
+            const isAvailable = (item.status === 'Fresh') ? true : false;
             if (isAvailable) {
                 // return a new sum if available
-                return total + (count * parseInt(fish.price));
+                return total + (count * parseInt(item.price));
             }
             //return the same total otherwise
             return total
         }, 0);
     },
 
-    render : function() {
+    renderOrders: function(key) {
+        const item = this.props.items[key];
+        const count = this.props.orders[key];
 
+        // this function renders the order if it's available
+        function display() {
+            if (item.status !== 'Fresh') {
+                return (
+                    <li key={key}>
+                        <h4>{item.name}</h4>
+                        <p>sorry, item you are looking for is no longer available</p>
+                    </li>
+                )
+            } else {
+                return (
+                    <li key={key}>
+                        <h4>{item.name}</h4>
+                        <p>{count} lbs</p>
+                        <p className="price">price: {(parseInt(item.price)) * count}</p>
+                    </li>
+                )
+            }
+        }
+        // return the return of display or nothing if item is not available
+        return item ? display() : null;     
+    },
+
+    render : function() {
+        const orderIds = Object.keys(this.props.orders);
         return(
-            <div className="order-wrap">
+            <li className="order-wrap">
                 <h2 className="order-title">Your Order</h2>
                 <ul className="order">
-                    {this.getTotal()}
+                    {orderIds.map(this.renderOrders)}
+                    <li className="total">
+                        <strong>TOTAL: </strong> 
+                        {this.getTotal(orderIds)}
+                    </li>
                 </ul>
-            </div>
+            </li>
         )
     }
 });
