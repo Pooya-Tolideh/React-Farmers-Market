@@ -12,7 +12,7 @@ const History = ReactRouter.History;
 var sampleData = {
     item1: {
             name : 'rand',
-            price : 9.99,
+            price : 6.99,
             desc : 'lorem ipsom',
             status: 'Fresh',
             image: './images/test.jpg'
@@ -30,7 +30,7 @@ var sampleData = {
 
     item3: {
             name : 'band',
-            price : 9.99,
+            price : 19.99,
             desc : 'lorem ipsom',
             status: 'Sold Out',
             image: './images/test.jpg'
@@ -82,7 +82,7 @@ const App = React.createClass({
                         {this.renderItems()}
                     </ul>
                 </div>
-                <Order/>
+                <Order fishes={this.state.items} orders={this.state.orders}/>
                 <Inventory addItem={ this.addItem } />
             </div>
         )
@@ -131,7 +131,7 @@ const Inventory = React.createClass({
     }
 });
 
-
+//<AddForm />
 const AddForm = React.createClass({
 
     createItem: function(e) {
@@ -169,9 +169,31 @@ const AddForm = React.createClass({
 
 //<Order/>
 const Order = React.createClass({
-    render : () => {
+
+    getTotal: function() {
+        const orderIds = Object.keys(this.props.orders);
+        return orderIds.reduce((total, key) => {
+            let fish = this.props.fishes[key];
+            let count = this.props.orders[key];
+            const isAvailable = (fish.status === 'Fresh') ? true : false;
+            if (isAvailable) {
+                // return a new sum if available
+                return total + (count * parseInt(fish.price));
+            }
+            //return the same total otherwise
+            return total
+        }, 0);
+    },
+
+    render : function() {
+
         return(
-            <p>Order</p>
+            <div className="order-wrap">
+                <h2 className="order-title">Your Order</h2>
+                <ul className="order">
+                    {this.getTotal()}
+                </ul>
+            </div>
         )
     }
 });
