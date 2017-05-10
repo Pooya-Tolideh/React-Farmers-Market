@@ -9,6 +9,20 @@ const Route = ReactRouter.Route;
 const Navigation = ReactRouter.Navigation;
 const History = ReactRouter.History;
 
+
+//Firebase
+// var Rebase = require('re-base');
+
+// var base = Rebase.createClass({
+//     apiKey: "AIzaSyDSJRN_K85Ar7YyRaNp_nN55mspRT6We-0",
+//     authDomain: "farmers-market-775eb.firebaseapp.com",
+//     databaseURL: "https://farmers-market-775eb.firebaseio.com",
+//     projectId: "farmers-market-775eb",
+//     storageBucket: "farmers-market-775eb.appspot.com",
+//     messagingSenderId: "101654828300"
+// },'base');
+
+
 var sampleData = {
     item1: {
             name : 'rand',
@@ -46,8 +60,38 @@ const App = React.createClass({
     getInitialState : function() {
         return {
             items: sampleData,
-            orders: {}
+            orders: {},
+            storeName: this.props.params.storeId
         }
+    },
+
+    // runs before a component is mounted. Good for running async events
+    // such as ajax, setTimeout, etc
+    componentDidMount : function() {
+        console.log('did mount')
+        // base.syncState(`shoppingList`, {
+        //     context: this,
+        //     state: 'items',
+        //     asArray: true
+        // });
+        this.loadStorage();
+    },
+
+    // Sort of an event listener for data
+    // whenever state or props changes, it runs
+    // and accepts the new state and props from React
+    componentWillUpdate : function(nextProps, nextState) {
+        localStorage.setItem(`order-${this.state.storeName}`, JSON.stringify(nextState.orders));
+    },
+
+    //loads local storage data into state if it exists
+    loadStorage: function () {
+        const localStorageRef = localStorage.getItem(`order-${this.state.storeName}`);
+        if (localStorageRef) {
+            this.setState({
+                orders: JSON.parse(localStorageRef)
+            });
+        }   
     },
 
     addItem : function(item) {
