@@ -3,6 +3,7 @@ const ReactDOM = require('react-dom');
 const ReactRouter = require('react-router');
 const createBrowserHistory = require('history/lib/createBrowserHistory');
 const h = require('./helpers.js');
+const Catalyst = require('react-catalyst');
 
 const Router = ReactRouter.Router;
 const Route = ReactRouter.Route;
@@ -54,9 +55,10 @@ var sampleData = {
 
 //<App/>
 const App = React.createClass({
+    mixins : [Catalyst.LinkedStateMixin],
+
     //parent component that controls data flow has state object
     // initial state = inital state of data in the app before it mounts
-
     getInitialState : function() {
         return {
             items: sampleData,
@@ -127,7 +129,7 @@ const App = React.createClass({
                     </ul>
                 </div>
                 <Order items={this.state.items} orders={this.state.orders}/>
-                <Inventory addItem={ this.addItem } />
+                <Inventory addItem={ this.addItem } items={this.state.items} linkState={this.linkState}/>
             </div>
         )
     }
@@ -165,15 +167,37 @@ const Item = React.createClass({
 
 //<Inventory/>
 const Inventory = React.createClass({
+
+    //two-way binding
+    displayItems: function(key) {
+        const linkState = this.props.linkState;
+        return (
+            <form className="fish-edit" key={key}>
+            <br/><br/><br/>
+                <input type="text" ref="name" valueLink={linkState(`items.${key}.name`)}/>
+                <input type="text" ref="price" valueLink={linkState(`items.${key}.price`)}/>
+                <select ref="status" valueLink={linkState(`items.${key}.status`)}>   
+                    <option value="available">Fresh</option>
+                    <option value="unavailable">Sold Out!</option>
+                </select>
+                <textarea name="text" id="" ref="desc" valueLink={linkState(`items.${key}.desc`)}></textarea>
+                <input type="text" ref="image" valueLink={linkState(`items.${key}.image`)} />
+                {/*<button type="submit">+ Add item</button> */}
+            <br/><br/><br/><hr/>
+            </form>
+        )
+    },
     render : function () {
         return(
             <div>
-                <p>Inventory</p>
+                <h1>Inventory</h1>
+                {Object.keys(this.props.items).map(this.displayItems)}
                 <AddForm {...this.props} />
             </div>
         )
     }
 });
+
 
 //<AddForm />
 const AddForm = React.createClass({
@@ -239,6 +263,7 @@ const Order = React.createClass({
                     <li key={key}>
                         <h4>{item.name}</h4>
                         <p>sorry, item you are looking for is no longer available</p>
+                        <hr/>
                     </li>
                 )
             } else {
@@ -247,6 +272,7 @@ const Order = React.createClass({
                         <h4>{item.name}</h4>
                         <p>{count} lbs</p>
                         <p className="price">price: {(parseInt(item.price)) * count}</p>
+                        <hr/>
                     </li>
                 )
             }
