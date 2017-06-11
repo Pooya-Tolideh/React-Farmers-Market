@@ -102,12 +102,29 @@ const App = React.createClass({
         this.setState({ items: this.state.items });
     },
 
+    removeItem : function(key) {
+        if (confirm('You sure you want to remove this item?')) {
+            delete this.state.items[key];
+            this.setState({ 
+                items: this.state.items
+            });
+        }
+    },
+
     // get the key-value pair in orders dataset
     // if it's empty set the value of that key to 1
     // else add 1 to it
     addOrder: function(key) {
         this.state.orders[key] = this.state.orders[key] + 1 || 1;
         this.setState({ orders: this.state.orders });
+    },
+
+    removeOrder: function(e, key) {
+        e.preventDefault();
+        delete this.state.orders[key];
+        this.setState({ 
+            orders: this.state.orders 
+        });
     },
 
     renderItems : function () {
@@ -118,7 +135,6 @@ const App = React.createClass({
         return list;
     },
 
-
     render: function () {
         return (
             <div className="catch-of-the-day">
@@ -128,8 +144,8 @@ const App = React.createClass({
                         {this.renderItems()}
                     </ul>
                 </div>
-                <Order items={this.state.items} orders={this.state.orders}/>
-                <Inventory addItem={ this.addItem } items={this.state.items} linkState={this.linkState}/>
+                <Order items={this.state.items} removeOrder={ this.removeOrder } orders={this.state.orders}/>
+                <Inventory addItem={ this.addItem } removeItem={ this.removeItem } items={this.state.items} linkState={this.linkState}/>
             </div>
         )
     }
@@ -147,19 +163,21 @@ const Item = React.createClass({
     
     render: function() {
         const details = this.props.details;
-        const isAvailable = (details.status === 'Fresh') ? true : false;
-        const btn = isAvailable ? 'Add to Order' : 'Sold Out';
-        return (
-            <li className="menu-fish">
-                <img src={details.image} alt={details.name}/>
-                <h3 className="fish-name">
-                    {details.name}
-                    <span className="price">{details.price}</span>
-                    <p>{details.desc}</p>
-                </h3>
-                <button disabled={!isAvailable} onClick={this.createOrder}>{btn}</button>
-            </li>
-        )
+        if (details) {
+            const isAvailable = (details.status === 'Fresh') ? true : false;
+            const btn = isAvailable ? 'Add to Order' : 'Sold Out';
+            return (
+                <li className="menu-fish">
+                    <img src={details.image} alt={details.name}/>
+                    <h3 className="fish-name">
+                        {details.name}
+                        <span className="price">{details.price}</span>
+                        <p>{details.desc}</p>
+                    </h3>
+                    <button disabled={!isAvailable} onClick={this.createOrder}>{btn}</button>
+                </li>
+            )
+        }
     }
 });
 
@@ -167,6 +185,11 @@ const Item = React.createClass({
 
 //<Inventory/>
 const Inventory = React.createClass({
+
+    deleteItem: function(e, key) {
+        e.preventDefault();
+        this.props.removeItem(key);
+    },
 
     //two-way binding
     displayItems: function(key) {
@@ -182,11 +205,12 @@ const Inventory = React.createClass({
                 </select>
                 <textarea name="text" id="" ref="desc" valueLink={linkState(`items.${key}.desc`)}></textarea>
                 <input type="text" ref="image" valueLink={linkState(`items.${key}.image`)} />
-                {/*<button type="submit">+ Add item</button> */}
+                <button onClick={(e) => { this.deleteItem(e,key) } }>Remove item</button>
             <br/><br/><br/><hr/>
             </form>
         )
     },
+
     render : function () {
         return(
             <div>
@@ -196,6 +220,9 @@ const Inventory = React.createClass({
             </div>
         )
     }
+    // map pushes the returned value of callback function inside it into an array
+    // so all we have to do is to return a JSX component in each callback
+    // react will automatically render and list items inside the array
 });
 
 
@@ -241,13 +268,16 @@ const Order = React.createClass({
     getTotal: function(ids) {
         return ids.reduce((total, key) => {
             let item = this.props.items[key];
-            let count = this.props.orders[key];
-            const isAvailable = (item.status === 'Fresh') ? true : false;
-            if (isAvailable) {
-                // return a new sum if available
-                return total + (count * parseInt(item.price));
+            // if items is not removed from inventory
+            if (item) {
+                let count = this.props.orders[key];
+                const isAvailable = (item.status === 'Fresh') ? true : false;
+                if (isAvailable) {
+                    // return a new sum if available
+                    return total + (count * parseInt(item.price));
+                }
             }
-            //return the same total otherwise
+        //return the same total otherwise
             return total
         }, 0);
     },
@@ -255,23 +285,34 @@ const Order = React.createClass({
     renderOrders: function(key) {
         const item = this.props.items[key];
         const count = this.props.orders[key];
+        
+        // avoiding duplication
+        const 
+            removeButton = (
+                <button onClick={(e) => { this.props.removeOrder(e, key) }}>X</button>
+            ),
+            orderName = (
+                <h4>{item.name}</h4>
+            );
 
         // this function renders the order if it's available
         function display() {
             if (item.status !== 'Fresh') {
                 return (
                     <li key={key}>
-                        <h4>{item.name}</h4>
+                        { orderName }
                         <p>sorry, item you are looking for is no longer available</p>
+                        {removeButton}
                         <hr/>
                     </li>
                 )
             } else {
                 return (
                     <li key={key}>
-                        <h4>{item.name}</h4>
+                        { orderName }
                         <p>{count} lbs</p>
                         <p className="price">price: {(parseInt(item.price)) * count}</p>
+                        { removeButton }
                         <hr/>
                     </li>
                 )
